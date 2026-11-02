@@ -1,10 +1,13 @@
 
 name: GitHub Profile 3D Contributions
 
-on:
+"on":
+  push:
+    branches:
+      - main
+  workflow_dispatch:
   schedule:
     - cron: "0 18 * * *"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,4 +32,3 @@ jobs:
           git add -A profile-3d-contrib
           git commit -m "Update 3D contribution graph" || exit 0
           git push
-
