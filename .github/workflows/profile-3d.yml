@@ -1,34 +1,44 @@
+name: Update Profile Images
 
-name: GitHub Profile 3D Contributions
-
-"on":
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+on:
   schedule:
-    - cron: "0 18 * * *"
+    - cron: "0 0 * * *" # روزانہ اپ ڈیٹ ہوگا
+  workflow_dispatch: # آپ خود بھی چلا سکتے ہیں
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  update-images:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate 3D contribution graph
+      # 1. Download Stats and Languages
+      - name: Download Stats Cards
+        run: |
+          mkdir -p profile
+          curl -s "https://github-readme-stats.vercel.app/api?username=Aliraza8284&show_icons=true&theme=tokyonight&hide_border=true&bg_color=0d1117&title_color=38bdf8&icon_color=38bdf8&text_color=c9d1d9" -o profile/stats.svg
+          curl -s "https://github-readme-stats.vercel.app/api/top-langs/?username=Aliraza8284&layout=compact&langs_count=8&theme=tokyonight&hide_border=true&bg_color=0d1117&title_color=38bdf8&text_color=c9d1d9" -o profile/top-langs.svg
+
+      # 2. Download Activity Graph
+      - name: Download Activity Graph
+        run: |
+          curl -s "https://github-readme-activity-graph.vercel.app/graph?username=Aliraza8284&bg_color=0d1117&color=38bdf8&line=06b6d4&point=ffffff&area=true&hide_border=true" -o profile/activity-graph.svg
+
+      # 3. Generate 3D Contribution Graph
+      - name: Generate 3D Contribution Graph
         uses: yoshi389111/github-profile-3d-contrib@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
 
-      - name: Commit generated files
+      # 4. Save all images to repository
+      - name: Commit and Push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A profile-3d-contrib
-          git commit -m "Update 3D contribution graph" || exit 0
+          git add -A profile profile-3d-contrib
+          git commit -m "Auto-update profile images" || exit 0
           git push
